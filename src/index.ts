@@ -3,6 +3,7 @@ import { join } from 'path'
 
 const RESOLVE_PLUGIN_NAME = 'vite:resolve'
 const VITE_PLUGIN_NAME = 'vite-plugin-resolve-inject'
+const PRELOAD_HELPER = '\0vite/preload-helper' // 此路径为vite内部的virtual path
 
 function PluginResolveInject(): Plugin {
     let resolvePlugin: Plugin | undefined
@@ -18,6 +19,7 @@ function PluginResolveInject(): Plugin {
         async resolveId(id, ...args) {
             // 重写路径尝试去node_modules中解析
             // PR: https://github.com/vitejs/vite/pull/8015
+            if (id === PRELOAD_HELPER) return PRELOAD_HELPER
             const tryPath = join(root, `/node_modules/${id}`)
             if (resolvePlugin && resolvePlugin.resolveId) {
                 const res = await resolvePlugin.resolveId.call(this, tryPath, ...args)
